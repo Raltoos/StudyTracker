@@ -1,62 +1,52 @@
 /* eslint-disable react/prop-types */
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import AlarmClock from "./AlarmClock";
-import Button from "./Button";
+import Modal from "./Modal";
+import TimeConfirmation from "./TimeConfirmation";
+import SetTime from "./SetTime";
 
-export default function Window({init}) {
+export default function Window({ init }) {
   const [time, setTime] = useState(init);
+  const [totalSeconds, setTotalSeconds] = useState([0, 0]);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  const modal = useRef();
+
   useEffect(() => {
     setTime(init);
   }, [init]);
-  const secondRef = useRef(0);
-  const minutesRef = useRef(0);
-  const hoursRef = useRef(0);
 
-  function handleSubmit(e) {
-    e.preventDefault();
-
-    let seconds = parseInt(secondRef.current.value) || 0;
-    let minutes = parseInt(minutesRef.current.value) || 0;
-    let hours = parseInt(hoursRef.current.value) || 0;
-
-    let timerTime = seconds + minutes * 60 + hours * 3600;
-
-    setTime(timerTime);
+  function handleStart() {
+    // setIsModalOpen(true);
+    modal.current.open();
   }
+
+  function handleCancel() {
+    // setIsModalOpen(false);
+    modal.current.close();
+  }
+
+  function handleConfirm() {
+    setTime(totalSeconds);
+    // setIsModalOpen(false);
+    modal.current.close();
+  }
+
   return (
-    <div className="w-1/2 h-fit flex flex-col justify-center items-center">
-      <form
-        className="flex flex-col gap-2 border border-black p-2 rounded-md mb-4 bg-slate-200"
-        onSubmit={handleSubmit}
-      >
-        <p>Enter the time</p>
+    <div className="w-full h-full flex flex-col justify-center items-center ">
+      <Modal ref={modal}>
+        <SetTime setTotalSeconds={setTotalSeconds} />
+        <TimeConfirmation onCancel={handleCancel} onConfirm={handleConfirm} />
+      </Modal>
 
-        <div className="flex gap-2">
-          <input
-            ref={hoursRef}
-            type="number"
-            className="border border-black w-12 px-1 bg-slate-200 text-black"
-            placeholder="00"
-          />
-          <p>:</p>
-          <input
-            ref={minutesRef}
-            type="number"
-            className="border border-black w-12 px-1 bg-slate-200 text-black"
-            placeholder="00"
-          />
-          <p>:</p>
-          <input
-            ref={secondRef}
-            type="number"
-            className="border border-black w-12 px-1 bg-slate-200 text-black"
-            placeholder="00"
-          />
-        </div>
-
-        <Button>Set time</Button>
-      </form>
-      <AlarmClock INITIAL_COUNT={time} />
+      <div className="h-fit w-fit flex flex-col items-center overflow-hidden cursor-pointer transition">
+        <p
+          className="text-xl font-bold hover:text-red-500 mb-2"
+          onClick={handleStart}
+        >
+          --Set up the timer--
+        </p>
+      </div>
+      <AlarmClock initialTime={time} />
     </div>
   );
 }
